@@ -16,6 +16,8 @@ import org.springframework.web.bind.annotation.RestController;
 import com.example.proyectomc.Equipo.Equipo;
 import com.example.proyectomc.Equipo.EquipoRepository;
 
+import jakarta.validation.Valid;
+
 @RestController
 @RequestMapping("/api/jugador")
 public class JugadorController {
@@ -36,7 +38,7 @@ public class JugadorController {
     }
 
     @PostMapping
-    public Jugador createJugador(@RequestBody Jugador jugador) {
+    public Jugador createJugador(@RequestBody @Valid Jugador jugador) {
         Optional<Equipo> equipoOptional = equipoRepository.findById(jugador.getEquipo().getId());
         if (equipoOptional.isPresent()) {
             jugador.setEquipo(equipoOptional.get());
@@ -47,7 +49,7 @@ public class JugadorController {
     }
 
     @PutMapping("/{id}")
-    public Jugador updateJugador(@PathVariable int id, @RequestBody Jugador jugadorDetails) {
+    public Jugador updateJugador(@PathVariable int id, @Valid @RequestBody Jugador jugadorDetails) {
         Jugador jugador = jugadorRepository.findById(id).orElseThrow();
         jugador.setNombre(jugadorDetails.getNombre());
         jugador.setFechaNacimiento(jugadorDetails.getFechaNacimiento());

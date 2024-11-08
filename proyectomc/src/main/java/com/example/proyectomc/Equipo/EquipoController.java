@@ -11,6 +11,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import jakarta.validation.Valid;
+
 @RestController
 @RequestMapping("/api/equipo")
 public class EquipoController {
@@ -28,12 +30,12 @@ public class EquipoController {
     }
 
     @PostMapping
-    public Equipo createEquipo(@RequestBody Equipo equipo) {
+    public Equipo createEquipo(@Valid @RequestBody Equipo equipo) {
         return equipoRepository.save(equipo);
     }
 
     @PutMapping("/{id}")
-    public Equipo updateEquipo(@PathVariable int id, @RequestBody Equipo equipoDetails) {
+    public Equipo updateEquipo(@Valid @PathVariable int id, @RequestBody Equipo equipoDetails) {
         Equipo equipo = equipoRepository.findById(id).orElseThrow();
         equipo.setNombre(equipoDetails.getNombre());
         equipo.setCiudad(equipoDetails.getCiudad());
