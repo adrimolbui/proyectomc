@@ -19,7 +19,7 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-@Entity
+@Entity // Definición de la entidad Jugador
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
@@ -43,8 +43,10 @@ public class Jugador {
     @NotBlank(message = "La posición del jugador no puede estar vacía")
     private String posicion;
 
-    @ManyToOne
+    @ManyToOne // Relación muchos a uno entre Jugador y Equipo: muchos jugadores pueden estar en un mismo equipo
     @JoinColumn(name = "equipo_id")
-    @JsonIgnoreProperties("jugadores")
+    @JsonIgnoreProperties("jugadores")// Ignora la propiedad "jugadores" para evitar recursividad
     private Equipo equipo;
+
+    private Integer goles = 0;
 }

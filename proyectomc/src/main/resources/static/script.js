@@ -1,10 +1,30 @@
+//Cambiar de tema
+const themeToggleButton = document.getElementById('themeToggleButton');
+const body = document.body;
+
+const savedTheme = localStorage.getItem('theme') || 'dark';
+body.setAttribute('data-bs-theme', savedTheme);
+
+themeToggleButton.textContent = savedTheme === 'dark' ? '☀️' : '🌙';
+
+themeToggleButton.addEventListener('click', () => {
+    const currentTheme = body.getAttribute('data-bs-theme');
+    const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+
+    body.setAttribute('data-bs-theme', newTheme);
+    themeToggleButton.textContent = newTheme === 'dark' ? '☀️' : '🌙';
+
+    localStorage.setItem('theme', newTheme);
+});
+
+// Ejecutar cuando el contenido HTML haya sido cargado
 document.addEventListener("DOMContentLoaded", () => {
     const tableBodyJugadores = document.querySelector("#jugadoresTable tbody");
     const tableBodyEquipos = document.querySelector("#equiposTable tbody");
-    const equipoSelect = document.querySelector("#createEquipo");
 
-    let equipos = [];  // Guardamos los equipos en una variable global
+    let equipos = [];
 
+    // Función para obtener los jugadores desde la API y mostrarlos en la tabla
     function fetchJugadores() {
         fetch('http://localhost:8080/api/jugador')
             .then(response => response.json())
@@ -30,11 +50,12 @@ document.addEventListener("DOMContentLoaded", () => {
             .catch(error => console.error('Error al obtener los jugadores:', error));
     }
 
+    // Función para obtener los equipos desde la API y mostrarlos en la tabla
     function fetchEquipos() {
         fetch('http://localhost:8080/api/equipo')
             .then(response => response.json())
             .then(data => {
-                equipos = data;  // Guardamos los equipos en la variable
+                equipos = data;
                 tableBodyEquipos.innerHTML = '';
                 data.forEach(equipo => {
                     const row = document.createElement("tr");
@@ -49,12 +70,12 @@ document.addEventListener("DOMContentLoaded", () => {
                     `;
                     tableBodyEquipos.appendChild(row);
                 });
-                // Actualizar el select de equipos para la creación de jugadores
                 actualizarSelectEquipos();
             })
             .catch(error => console.error('Error al obtener los equipos:', error));
     }
 
+    // Función para mostrar el formulario de edición de un equipo
     window.showEditEquipoForm = function (id) {
         fetch(`http://localhost:8080/api/equipo/${id}`)
             .then(response => response.json())
@@ -83,12 +104,12 @@ document.addEventListener("DOMContentLoaded", () => {
                 editRow.classList.add("edit-form-row");
                 equipoRow.parentNode.insertBefore(editRow, equipoRow.nextSibling);
 
+                // Manejar el envío del formulario de edición
                 document.querySelector(`#editEquipoForm-${id}`).addEventListener("submit", function (event) {
                     event.preventDefault();
                     const nombre = document.querySelector(`#editEquipoNombre-${id}`).value;
                     const ciudad = document.querySelector(`#editEquipoCiudad-${id}`).value;
 
-                    // Enviar los datos actualizados al servidor
                     fetch(`http://localhost:8080/api/equipo/${id}`, {
                         method: 'PUT',
                         headers: {
@@ -100,7 +121,7 @@ document.addEventListener("DOMContentLoaded", () => {
                         })
                     })
                         .then(() => {
-                            fetchEquipos(); // Refrescar la lista de equipos
+                            fetchEquipos();
                         })
                         .catch(error => console.error('Error al actualizar el equipo:', error));
                 });
@@ -108,47 +129,46 @@ document.addEventListener("DOMContentLoaded", () => {
             .catch(error => console.error('Error al obtener los detalles del equipo:', error));
     };
 
+    // Función para eliminar un equipo
     window.deleteEquipo = function (id) {
-        console.log('Eliminando equipo con id:', id);  // Añade un log para verificar el id.
+        console.log('Eliminando equipo con id:', id);
         fetch(`http://localhost:8080/api/equipo/${id}`, {
             method: 'DELETE',
         })
-            .then(() => fetchEquipos())  // Refresca la lista de equipos después de eliminar.
+            .then(() => fetchEquipos())
             .catch(error => console.error('Error al eliminar el equipo:', error));
     };
 
-    // Función para crear un equipo
+    // Función para crear un nuevo equipo
     function crearEquipo(event) {
-        event.preventDefault();  // Evitar que el formulario se envíe de la manera tradicional
+        event.preventDefault();
 
         const nombre = document.querySelector("#createEquipoNombre").value;
         const ciudad = document.querySelector("#createEquipoCiudad").value;
 
-        // Verificamos que los campos no estén vacíos
         if (!nombre || !ciudad) {
             alert("Por favor, ingrese todos los campos.");
             return;
         }
 
-        // Crear el objeto equipo
         const nuevoEquipo = {
             nombre: nombre,
             ciudad: ciudad
         };
 
-        // Enviar la solicitud POST al servidor
+        // Enviar solicitud POST para crear un nuevo equipo
         fetch('http://localhost:8080/api/equipo', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
             },
-            body: JSON.stringify(nuevoEquipo)  // Convertimos el objeto a JSON
+            body: JSON.stringify(nuevoEquipo)
         })
             .then(response => response.json())
             .then(data => {
                 console.log('Equipo creado:', data);
-                fetchEquipos();  // Refrescar la lista de equipos
-                document.querySelector("#createEquipoForm").reset();  // Limpiar el formulario después de crear el equipo
+                fetchEquipos();
+                document.querySelector("#createEquipoForm").reset();
             })
             .catch(error => {
                 console.error('Error al crear el equipo:', error);
@@ -156,23 +176,20 @@ document.addEventListener("DOMContentLoaded", () => {
             });
     }
 
-    // Asociar la función de creación con el evento del formulario
     document.querySelector("#createEquipoForm").addEventListener("submit", crearEquipo);
 
-
+    // Función para actualizar el selector de equipos en el formulario de creación
     function actualizarSelectEquipos() {
         const equipoSelect = document.querySelector("#createEquipo");
-        equipoSelect.innerHTML = '';  // Limpiar el contenido actual del select
-    
-        // Crear la opción predeterminada
+        equipoSelect.innerHTML = '';
+
         const opcionSeleccionar = document.createElement("option");
         opcionSeleccionar.value = "";
         opcionSeleccionar.textContent = "Seleccionar equipo";
         opcionSeleccionar.disabled = true;
-        opcionSeleccionar.selected = true;  // Esta opción es la que estará seleccionada por defecto
+        opcionSeleccionar.selected = true;
         equipoSelect.appendChild(opcionSeleccionar);
-    
-        // Agregar los equipos como opciones
+
         equipos.forEach(equipo => {
             const option = document.createElement("option");
             option.value = equipo.id;
@@ -180,22 +197,19 @@ document.addEventListener("DOMContentLoaded", () => {
             equipoSelect.appendChild(option);
         });
     }
-    
 
-    function formatearFecha(fecha) {
+    // Función para formatear las fechas de nacimiento de los jugadores
+    function formatearFecha(fecha, formatoInput = false) {
         const date = new Date(fecha);
         const day = String(date.getDate()).padStart(2, '0');
         const month = String(date.getMonth() + 1).padStart(2, '0');
         const year = date.getFullYear();
+
+        if (formatoInput) {
+            return `${year}-${month}-${day}`;
+        }
+
         return `${day}-${month}-${year}`;
-    }
-
-    function formatearFecha2(fecha) {
-        const date = new Date(fecha);
-        const day = String(date.getDate()).padStart(2, '0');
-        const month = String(date.getMonth() + 1).padStart(2, '0');
-        const year = date.getFullYear();
-        return `${year}-${month}-${day}`;
     }
 
     window.showEditForm = function (id) {
@@ -214,7 +228,7 @@ document.addEventListener("DOMContentLoaded", () => {
                             </div>
                             <div class="form-group">
                                 <label for="editFechaNacimiento-${id}">Fecha de Nacimiento:</label>
-                                <input type="date" class="form-control" id="editFechaNacimiento-${id}" value="${formatearFecha2(formatoFecha)}" required>
+                                <input type="date" class="form-control" id="editFechaNacimiento-${id}" value="${formatearFecha(formatoFecha, true)}" required>
                             </div>
                             <div class="form-group">
                                 <label for="editNumeroCamiseta-${id}">Número de Camiseta:</label>
@@ -231,6 +245,10 @@ document.addEventListener("DOMContentLoaded", () => {
                                         <option value="${equipo.id}" ${equipo.id === jugador.equipo.id ? 'selected' : ''}>${equipo.nombre}</option>
                                     `).join('')}
                                 </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="editGoles-${id}">Goles:</label>
+                                <input type="number" class="form-control" id="editGoles-${id}" value="${jugador.goles || 0}" required min="0">
                             </div>
                             <button type="submit" class="btn btn-primary">Guardar cambios</button>
                         </form>
@@ -252,6 +270,7 @@ document.addEventListener("DOMContentLoaded", () => {
                     const numeroCamiseta = document.querySelector(`#editNumeroCamiseta-${id}`).value;
                     const posicion = document.querySelector(`#editPosicion-${id}`).value;
                     const equipoId = document.querySelector(`#editEquipo-${id}`).value;
+                    const goles = parseInt(document.querySelector(`#editGoles-${id}`).value);
 
                     fetch(`http://localhost:8080/api/jugador/${id}`, {
                         method: 'PUT',
@@ -263,11 +282,14 @@ document.addEventListener("DOMContentLoaded", () => {
                             fechaNacimiento: fechaNacimiento,
                             numeroCamiseta: numeroCamiseta,
                             posicion: posicion,
-                            equipo: { id: equipoId }
+                            equipo: { id: equipoId },
+                            goles: goles
+
                         })
                     })
                         .then(() => {
                             fetchJugadores();
+                            fetchGoleadores();
                         })
                         .catch(error => console.error('Error al actualizar el jugador:', error));
                 });
@@ -279,34 +301,42 @@ document.addEventListener("DOMContentLoaded", () => {
         fetch(`http://localhost:8080/api/jugador/${id}`, {
             method: 'DELETE',
         })
-            .then(() => fetchJugadores())
+            .then(response => {
+                if (response.ok) {
+                    console.log("Jugador eliminado correctamente");
+                    fetchJugadores();
+                    fetchGoleadores();
+                } else {
+                    alert("Hubo un problema al eliminar el jugador.");
+                }
+            })
             .catch(error => console.error('Error al eliminar el jugador:', error));
     };
 
     // Función para crear un jugador
     function crearJugador(event) {
-        event.preventDefault(); // Evitar que el formulario se envíe de la manera tradicional
+        event.preventDefault();
 
-        // Obtener los valores de los campos del formulario
+
         const nombre = document.querySelector("#createNombre").value;
         const fechaNacimiento = document.querySelector("#createFechaNacimiento").value;
         const numeroCamiseta = document.querySelector("#createNumeroCamiseta").value;
         const posicion = document.querySelector("#createPosicion").value;
         const equipoId = document.querySelector("#createEquipo").value;
+        const goles = document.querySelector("#createGoles").value;
 
-        // Verificar que todos los campos estén llenos
-        if (!nombre || !fechaNacimiento || !numeroCamiseta || !posicion || !equipoId) {
+        if (!nombre || !fechaNacimiento || !numeroCamiseta || !posicion || !equipoId || goles < 0) {
             alert("Por favor, ingrese todos los campos.");
             return;
         }
 
-        // Crear el objeto jugador
         const nuevoJugador = {
             nombre: nombre,
             fechaNacimiento: fechaNacimiento,
             numeroCamiseta: numeroCamiseta,
             posicion: posicion,
-            equipo: { id: equipoId }
+            equipo: { id: equipoId },
+            goles: parseInt(goles)
         };
 
         // Enviar la solicitud POST al servidor para crear el jugador
@@ -315,13 +345,15 @@ document.addEventListener("DOMContentLoaded", () => {
             headers: {
                 'Content-Type': 'application/json'
             },
-            body: JSON.stringify(nuevoJugador) // Convertimos el objeto a JSON
+            body: JSON.stringify(nuevoJugador)
         })
             .then(response => response.json())
             .then(data => {
                 console.log('Jugador creado:', data);
-                fetchJugadores(); // Refrescar la lista de jugadores
-                document.querySelector("#createForm").reset(); // Limpiar el formulario después de crear el jugador
+                fetchJugadores();
+                fetchGoleadores();
+                document.querySelector("#createForm").reset();
+                document.querySelector("#createForm").reset();
                 actualizarSelectEquipos()
             })
             .catch(error => {
@@ -330,11 +362,32 @@ document.addEventListener("DOMContentLoaded", () => {
             });
     }
 
-    // Asociar la función de creación con el evento del formulario
     document.querySelector("#createForm").addEventListener("submit", crearJugador);
 
+    function fetchGoleadores() {
+        fetch('http://localhost:8080/api/jugador/topscorers')
+            .then(response => response.json())
+            .then(data => {
+                const tableBodyGoleadores = document.querySelector("#goleadoresTable tbody");
+                tableBodyGoleadores.innerHTML = '';
 
-    // Cargar jugadores y equipos al iniciar
+                data.forEach(jugador => {
+
+                    if (jugador.goles > 0) {
+                        const row = document.createElement("tr");
+                        row.innerHTML = `
+                            <td>${jugador.nombre}</td>
+                            <td>${jugador.equipo.nombre}</td>
+                            <td>${jugador.goles}</td>
+                        `;
+                        tableBodyGoleadores.appendChild(row);
+                    }
+                });
+            })
+            .catch(error => console.error('Error al obtener los goleadores:', error));
+    }
+
     fetchEquipos();
     fetchJugadores();
+    fetchGoleadores();
 });

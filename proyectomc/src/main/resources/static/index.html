@@ -9,6 +9,9 @@
 </head>
 
 <body data-bs-theme="dark">
+    <!-- Botón para cambiar de tema -->
+    <button id="themeToggleButton" class="btn btn-outline-light position-fixed top-0 end-0 m-3"></button>
+
     <div class="container mt-4">
         <!-- Formulario para Crear Equipo -->
         <h3>Crear Equipo</h3>
@@ -64,9 +67,27 @@
                     <option value="" disabled selected>Seleccionar equipo</option>
                 </select>
             </div>
+            <div class="form-group">
+                <label for="createGoles" class="mt-1">Goles:</label>
+                <input type="number" class="form-control mt-2" id="createGoles" required min="0">
+            </div>
             <button type="submit" class="btn btn-primary mt-3">Crear Jugador</button>
         </form>
 
+        <!-- Tabla de Máximos goleadores -->
+        <h2 class="mt-4">Top 10 Máximos Goleadores</h2>
+        <table class="table table-striped" id="goleadoresTable">
+            <thead>
+                <tr>
+                    <th>Nombre</th>
+                    <th>Equipo</th>
+                    <th>Goles</th>
+                </tr>
+            </thead>
+            <tbody>
+
+            </tbody>
+        </table>
         <!-- Lista de jugadores -->
         <h2 class="mt-4">Lista de Jugadores</h2>
         <table class="table table-striped" id="jugadoresTable">
@@ -82,7 +103,7 @@
                 </tr>
             </thead>
             <tbody>
-                <!-- Las filas se llenarán dinámicamente -->
+
             </tbody>
         </table>
     </div>

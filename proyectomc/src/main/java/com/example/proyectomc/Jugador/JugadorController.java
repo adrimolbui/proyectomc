@@ -50,23 +50,42 @@ public class JugadorController {
 
     @PutMapping("/{id}")
     public Jugador updateJugador(@PathVariable int id, @Valid @RequestBody Jugador jugadorDetails) {
-        Jugador jugador = jugadorRepository.findById(id).orElseThrow();
+        
+        Jugador jugador = jugadorRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Jugador no encontrado con id: " + id));
+
         jugador.setNombre(jugadorDetails.getNombre());
         jugador.setFechaNacimiento(jugadorDetails.getFechaNacimiento());
         jugador.setNumeroCamiseta(jugadorDetails.getNumeroCamiseta());
         jugador.setPosicion(jugadorDetails.getPosicion());
+
         Optional<Equipo> equipoOptional = equipoRepository.findById(jugadorDetails.getEquipo().getId());
         if (equipoOptional.isPresent()) {
             jugador.setEquipo(equipoOptional.get());
-            jugador.setFechaNacimiento(jugadorDetails.getFechaNacimiento());
-            return jugadorRepository.save(jugador);
         } else {
             throw new RuntimeException("Equipo no encontrado con id: " + jugadorDetails.getEquipo().getId());
         }
+
+        jugador.setGoles(jugadorDetails.getGoles());
+
+        return jugadorRepository.save(jugador);
+    }
+
+    @PutMapping("/{id}/goles/{goles}")
+    public Jugador addGoles(@PathVariable int id, @PathVariable int goles) {
+        Jugador jugador = jugadorRepository.findById(id).orElseThrow();
+        jugador.setGoles(jugador.getGoles() + goles);
+        return jugadorRepository.save(jugador);
+    }
+
+    @GetMapping("/topscorers")
+    public List<Jugador> getTop10Scorers() {
+        return jugadorRepository.findTop10ByDesc();
     }
 
     @DeleteMapping("/{id}")
     public void deleteJugador(@PathVariable int id) {
         jugadorRepository.deleteById(id);
     }
+
 }

@@ -15,7 +15,7 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-@Entity
+@Entity // Definición de la entidad Equipo
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
@@ -32,8 +32,8 @@ public class Equipo {
     @NotBlank(message = "La ciudad no puede estar vacía")
     private String ciudad;
 
-    @OneToMany(mappedBy = "equipo", cascade = CascadeType.ALL, orphanRemoval = true)
-    @JsonIgnoreProperties("equipo")
+    @OneToMany(mappedBy = "equipo", cascade = CascadeType.ALL) // Relación uno a muchos entre Equipo y Jugador: un equipo tiene muchos jugadores
+    @JsonIgnoreProperties("equipo") // Ignora la propiedad "equipo" en la serialización JSON para evitar recursividad
     private List<Jugador> jugadores;
 }
 
