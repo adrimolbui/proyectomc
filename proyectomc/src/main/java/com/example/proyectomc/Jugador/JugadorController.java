@@ -21,6 +21,7 @@ import jakarta.validation.Valid;
 @RestController
 @RequestMapping("/api/jugador")
 public class JugadorController {
+    
     @Autowired
     private JugadorRepository jugadorRepository;
 
